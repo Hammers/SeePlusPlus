@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include "Loops.h"
 using namespace std;
 
 void printPrimes(int limit){
@@ -9,4 +11,12 @@ void printPrimes(int limit){
 			else
 				if (i%j==0)
 					break;
+}
+
+void stringMod1(string* s){
+	*s = *s + "able";
+}
+
+void stringMod2(string& s){
+	s = s+ "est";
 }

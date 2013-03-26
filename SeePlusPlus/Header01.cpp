@@ -1,6 +1,5 @@
 #include <iostream>
-#include <./Header01.h>
-#include <limits>
+#include "Header01.h"
 using namespace std;
 
 void a(void){
@@ -17,12 +16,4 @@ char c(float x, float y){
 	cout << "\n function c" << "\n float= " << x
 		<< "\n float= " << y << endl;
 	return 'a';
-}
-
-int main(){
-	printPrimes(200);
-
-	std::cout << "Press ENTER to continue...";
-	std::cin.ignore( std::numeric_limits<std::streamsize>::max(), '\n' );
-	return 0;
 }
