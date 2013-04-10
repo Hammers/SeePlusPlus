@@ -18,6 +18,7 @@
 #include "hgesprite.h"
 #include "hgefont.h"
 #include "hgeparticle.h"
+#include "Ship.h"
 
 
 // Pointer to the HGE interface.
@@ -26,27 +27,21 @@ HGE *hge=0;
 
 
 // Pointers to the HGE objects we will use
-hgeSprite*			spr;
-hgeSprite*			spt;
 hgeFont*			fnt;
-hgeParticleSystem*	par;
+Ship*				player;
 
 // Handles for HGE resourcces
 HTEXTURE			tex;
 HEFFECT				snd;
-
-// Some "gameplay" variables
-float x=100.0f, y=100.0f;
-float dx=0.0f, dy=0.0f;
 
 const float speed=90;
 const float friction=0.98f;
 
 // Play sound effect
 void boom() {
-	int pan=int((x-400)/4);
-	float pitch=(dx*dx+dy*dy)*0.0005f+0.2f;
-	hge->Effect_PlayEx(snd,100,pan,pitch);
+	//int pan=int((x-400)/4);
+	//float pitch=(dx*dx+dy*dy)*0.0005f+0.2f;
+	//hge->Effect_PlayEx(snd,100,pan,pitch);
 }
 
 bool FrameFunc()
@@ -55,23 +50,11 @@ bool FrameFunc()
 
 	// Process keys
 	if (hge->Input_GetKeyState(HGEK_ESCAPE)) return true;
-	if (hge->Input_GetKeyState(HGEK_LEFT)) dx-=speed*dt;
-	if (hge->Input_GetKeyState(HGEK_RIGHT)) dx+=speed*dt;
-	if (hge->Input_GetKeyState(HGEK_UP)) dy-=speed*dt;
-	if (hge->Input_GetKeyState(HGEK_DOWN)) dy+=speed*dt;
-
-	// Do some movement calculations and collision detection	
-	dx*=friction; dy*=friction; x+=dx; y+=dy;
-	if(x>784) {x=784-(x-784);dx=-dx;boom();}
-	if(x<16) {x=16+16-x;dx=-dx;boom();}
-	if(y>584) {y=584-(y-584);dy=-dy;boom();}
-	if(y<16) {y=16+16-y;dy=-dy;boom();}
-
-	// Update particle system
-	par->info.nEmission=(int)(dx*dx+dy*dy)*2;
-	par->MoveTo(x,y);
-	par->Update(dt);
-
+	if (hge->Input_GetKeyState(HGEK_LEFT)) player->setDx(player->getDx()-speed*dt);
+	if (hge->Input_GetKeyState(HGEK_RIGHT)) player->setDx(player->getDx()+speed*dt);
+	if (hge->Input_GetKeyState(HGEK_UP)) player->setDy(player->getDy()-speed*dt);
+	if (hge->Input_GetKeyState(HGEK_DOWN)) player->setDy(player->getDy()+speed*dt);
+	player->Update(dt);
 	return false;
 }
 
@@ -81,8 +64,7 @@ bool RenderFunc()
 	// Render graphics
 	hge->Gfx_BeginScene();
 	hge->Gfx_Clear(0);
-	par->Render();
-	spr->Render(x, y);
+	player->Render();
 	fnt->printf(5, 5, HGETEXT_LEFT, "dt:%.3f\nFPS:%d (constant)", hge->Timer_GetDelta(), hge->Timer_GetFPS());
 	hge->Gfx_EndScene();
 
@@ -118,30 +100,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			hge->Release();
 			return 0;
 		}
-
-		// Create and set up a sprite
-		spr=new hgeSprite(tex, 96, 64, 32, 32);
-		spr->SetColor(0xFFFFA000);
-		spr->SetHotSpot(16,16);
-
+		player=new Ship(tex,96,64);
 		// Load a font
 		fnt=new hgeFont("font1.fnt");
-
-		// Create and set up a particle system
-		spt=new hgeSprite(tex, 32, 32, 32, 32);
-		spt->SetBlendMode(BLEND_COLORMUL | BLEND_ALPHAADD | BLEND_NOZWRITE);
-		spt->SetHotSpot(16,16);
-		par=new hgeParticleSystem("trail.psi",spt);
-		par->Fire();
 
 		// Let's rock now!
 		hge->System_Start();
 
 		// Delete created objects and free loaded resources
-		delete par;
 		delete fnt;
-		delete spt;
-		delete spr;
+		delete player;
 		hge->Texture_Free(tex);
 		hge->Effect_Free(snd);
 	}
