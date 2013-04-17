@@ -50,10 +50,10 @@ bool FrameFunc()
 
 	// Process keys
 	if (hge->Input_GetKeyState(HGEK_ESCAPE)) return true;
-	if (hge->Input_GetKeyState(HGEK_LEFT)) player->setDx(player->getDx()-speed*dt);
-	if (hge->Input_GetKeyState(HGEK_RIGHT)) player->setDx(player->getDx()+speed*dt);
-	if (hge->Input_GetKeyState(HGEK_UP)) player->setDy(player->getDy()-speed*dt);
-	if (hge->Input_GetKeyState(HGEK_DOWN)) player->setDy(player->getDy()+speed*dt);
+	if (hge->Input_GetKeyState(HGEK_LEFT)) player->setDx(player->getDx()-(speed*dt));
+	if (hge->Input_GetKeyState(HGEK_RIGHT)) player->setDx(player->getDx()+(speed*dt));
+	if (hge->Input_GetKeyState(HGEK_UP)) player->setDy(player->getDy()-(speed*dt));
+	if (hge->Input_GetKeyState(HGEK_DOWN)) player->setDy(player->getDy()+(speed*dt));
 	player->Update(dt);
 	return false;
 }
@@ -65,7 +65,7 @@ bool RenderFunc()
 	hge->Gfx_BeginScene();
 	hge->Gfx_Clear(0);
 	player->Render();
-	fnt->printf(5, 5, HGETEXT_LEFT, "dt:%.3f\nFPS:%d (constant)", hge->Timer_GetDelta(), hge->Timer_GetFPS());
+	fnt->printf(5, 5, HGETEXT_LEFT, "dt:%.3f\nFPS:%d (constant)\nX:%d\nY:%d", hge->Timer_GetDelta(), hge->Timer_GetFPS(),player->getX(),player->getY());
 	hge->Gfx_EndScene();
 
 	return false;

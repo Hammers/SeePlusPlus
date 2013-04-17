@@ -4,6 +4,8 @@ Ship::Ship(HTEXTURE tex,float xIn, float yIn){
 	// Create and set up a sprite
 	x = xIn;
 	y = yIn;
+	dx = 0;
+	dy = 0;
 	shipSprite=new hgeSprite(tex, x, y, 32, 32);
 	shipSprite->SetColor(0xFFFFA000);
 	shipSprite->SetHotSpot(16,16);
