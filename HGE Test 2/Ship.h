@@ -13,8 +13,11 @@ private:
 	float y;
 	float dx;
 	float dy;
+	float speed;
+	float friction;
+	int rotation;
 public:
-	Ship(HTEXTURE,float,float);
+	Ship(hgeSprite*,float,float);
 	~Ship();
 	void setX(float inX) {x = inX;}
 	float getX() {return x;}
@@ -24,9 +27,14 @@ public:
 	float getDx() {return dx;}
 	void setDy(float inDy) {dy = inDy;}
 	float getDy() {return dy;}
+	void setSpeed(float inSpeed) { speed = inSpeed;}
+	float getSpeed() {return speed;}
+	void setFriction(float inFriction) { friction = inFriction;}
+	float getFriction() {return friction;}
 	void Render();
-	void Update(float);
+	void Update(HGE*);
 	void Boom();
+	void Rotate();
 };
 
 #endif

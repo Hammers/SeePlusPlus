@@ -34,8 +34,7 @@ Ship*				player;
 HTEXTURE			tex;
 HEFFECT				snd;
 
-const float speed=90;
-const float friction=0.98f;
+
 
 // Play sound effect
 void boom() {
@@ -46,15 +45,8 @@ void boom() {
 
 bool FrameFunc()
 {
-	float dt=hge->Timer_GetDelta();
-
-	// Process keys
 	if (hge->Input_GetKeyState(HGEK_ESCAPE)) return true;
-	if (hge->Input_GetKeyState(HGEK_LEFT)) player->setDx(player->getDx()-(speed*dt));
-	if (hge->Input_GetKeyState(HGEK_RIGHT)) player->setDx(player->getDx()+(speed*dt));
-	if (hge->Input_GetKeyState(HGEK_UP)) player->setDy(player->getDy()-(speed*dt));
-	if (hge->Input_GetKeyState(HGEK_DOWN)) player->setDy(player->getDy()+(speed*dt));
-	player->Update(dt);
+	player->Update(hge);
 	return false;
 }
 
@@ -100,7 +92,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			hge->Release();
 			return 0;
 		}
-		player=new Ship(tex,96,64);
+		player=new Ship(new hgeSprite(tex, 96, 64, 32, 32),96,64);
 		// Load a font
 		fnt=new hgeFont("font1.fnt");
 
