@@ -1,19 +1,23 @@
 #define _USE_MATH_DEFINES
 #include "Ship.h"
 #include <math.h>
-Ship::Ship(hgeSprite* spr,float xIn, float yIn){
+
+Ship::Ship(hgeSprite* spr,float xIn, float yIn,int keyIn, const char* keyCharIn){
 	// Create and set up a sprite
 	x = xIn;
 	y = yIn;
 	dx = 0;
 	dy = 0;
+	key = keyIn;
+	keyChar = keyCharIn;
 	speed = 90;
-	friction = 0.98f;
+	friction = 0.7f;
 	rotation = 0;
 	shipSprite=spr;
 	shipSprite->SetColor(0xFFFFA000);
 	shipSprite->SetHotSpot(16,16);
-
+	fnt = new hgeFont("font1.fnt");
+	fnt->SetScale(0.7);
 	// Create and set up a particle system
 	particleSprite=spr;
 	particleSprite->SetBlendMode(BLEND_COLORMUL | BLEND_ALPHAADD | BLEND_NOZWRITE);
@@ -24,7 +28,8 @@ Ship::Ship(hgeSprite* spr,float xIn, float yIn){
 
 void Ship::Render(){
 	particle->Render();
-	shipSprite->RenderEx(x, y, M_PI*(rotation/2));
+	shipSprite->RenderEx(x, y, M_PI*(float)rotation/2);
+	fnt->printf(x-5, y-8, HGETEXT_LEFT, keyChar);
 }
 
 void Ship::Rotate(){
@@ -36,11 +41,12 @@ void Ship::Update(HGE* hge){
 	float dt=hge->Timer_GetDelta();
 
 	// Process keys
-	if (hge->Input_GetKeyState(HGEK_LEFT)) dx -= speed*dt;
-	if (hge->Input_GetKeyState(HGEK_RIGHT)) dx += speed*dt;
-	if (hge->Input_GetKeyState(HGEK_UP)) dy -= speed*dt;
-	if (hge->Input_GetKeyState(HGEK_DOWN)) dy += speed*dt;
 	if (hge->Input_KeyDown(HGEK_SPACE)) this->Rotate();
+	if (hge->Input_GetKeyState(key) && rotation==0) dx += speed*dt;
+	if (hge->Input_GetKeyState(key) && rotation==1) dy += speed*dt;
+	if (hge->Input_GetKeyState(key) && rotation==2) dx -= speed*dt;
+	if (hge->Input_GetKeyState(key) && rotation==3) dy -= speed*dt;
+	
 	// Do some movement calculations and collision detection	
 	dx*=friction; dy*=friction; x+=dx; y+=dy;
 	if(x>784) {x=784-(x-784);dx=-dx;}
@@ -56,6 +62,5 @@ void Ship::Update(HGE* hge){
 
 Ship::~Ship(){
 	delete particleSprite;
-	delete shipSprite;
 	delete particle;
 }

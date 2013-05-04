@@ -3,12 +3,14 @@
 #include "hge.h"
 #include "hgesprite.h"
 #include "hgeparticle.h"
+#include "hgefont.h"
 
 class Ship{
 private:
 	hgeSprite* shipSprite;
 	hgeSprite* particleSprite;
 	hgeParticleSystem* particle;
+	hgeFont* fnt;
 	float x;
 	float y;
 	float dx;
@@ -16,8 +18,10 @@ private:
 	float speed;
 	float friction;
 	int rotation;
+	int key;
+	const char* keyChar;
 public:
-	Ship(hgeSprite*,float,float);
+	Ship(hgeSprite*,float,float,int,const char*);
 	~Ship();
 	void setX(float inX) {x = inX;}
 	float getX() {return x;}
@@ -31,6 +35,7 @@ public:
 	float getSpeed() {return speed;}
 	void setFriction(float inFriction) { friction = inFriction;}
 	float getFriction() {return friction;}
+	int getRotation() {return rotation;}
 	void Render();
 	void Update(HGE*);
 	void Boom();

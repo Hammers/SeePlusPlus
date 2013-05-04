@@ -28,7 +28,8 @@ HGE *hge=0;
 
 // Pointers to the HGE objects we will use
 hgeFont*			fnt;
-Ship*				player;
+Ship*				ship1;
+Ship*				ship2;
 
 // Handles for HGE resourcces
 HTEXTURE			tex;
@@ -46,7 +47,8 @@ void boom() {
 bool FrameFunc()
 {
 	if (hge->Input_GetKeyState(HGEK_ESCAPE)) return true;
-	player->Update(hge);
+	ship1->Update(hge);
+	ship2->Update(hge);
 	return false;
 }
 
@@ -56,8 +58,8 @@ bool RenderFunc()
 	// Render graphics
 	hge->Gfx_BeginScene();
 	hge->Gfx_Clear(0);
-	player->Render();
-	fnt->printf(5, 5, HGETEXT_LEFT, "dt:%.3f\nFPS:%d (constant)\nX:%d\nY:%d", hge->Timer_GetDelta(), hge->Timer_GetFPS(),player->getX(),player->getY());
+	ship1->Render();
+	ship2->Render();
 	hge->Gfx_EndScene();
 
 	return false;
@@ -92,7 +94,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			hge->Release();
 			return 0;
 		}
-		player=new Ship(new hgeSprite(tex, 96, 64, 32, 32),96,64);
+		ship1=new Ship(new hgeSprite(tex, 96, 64, 32, 32),96,64,HGEK_Z,"Z");
+		ship2=new Ship(new hgeSprite(tex, 96, 64, 32, 32),300,300,HGEK_X,"X");
+		ship2->Rotate();
 		// Load a font
 		fnt=new hgeFont("font1.fnt");
 
@@ -101,7 +105,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		// Delete created objects and free loaded resources
 		delete fnt;
-		delete player;
+		delete ship1;
+		delete ship2;
 		hge->Texture_Free(tex);
 		hge->Effect_Free(snd);
 	}
