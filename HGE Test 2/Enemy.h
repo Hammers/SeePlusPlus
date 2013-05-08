@@ -1,15 +1,16 @@
-#ifndef SHIP_H
-#define SHIP_H
+#ifndef ENEMY_H
+#define ENEMY_H
 #include "hge.h"
 #include "hgesprite.h"
 #include "hgeparticle.h"
 #include "hgefont.h"
 
-class Ship{
+class Enemy{
 private:
-	hgeSprite* shipSprite;
+	hgeSprite* sprite;
 	hgeSprite* particleSprite;
 	hgeParticleSystem* particle;
+	hgeFont* fnt;
 	float x;
 	float y;
 	float dx;
@@ -17,9 +18,11 @@ private:
 	float speed;
 	float friction;
 	float rotation;
+	int key;
+	const char* keyChar;
 public:
-	Ship(hgeSprite*,float,float);
-	~Ship();
+	Enemy(hgeSprite*,float,float);
+	~Enemy();
 	void setX(float inX) {x = inX;}
 	float getX() {return x;}
 	void setY(float inY) {y = inY;}
@@ -34,8 +37,8 @@ public:
 	float getFriction() {return friction;}
 	void setRotation(float inRotation) {rotation = inRotation;}
 	float getRotation() {return rotation;}
-	virtual void Render();
-	virtual void Update(HGE*);
+	void Render();
+	void Update(HGE*);
 };
 
 #endif

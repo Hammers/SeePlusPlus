@@ -18,7 +18,7 @@
 #include "hgesprite.h"
 #include "hgefont.h"
 #include "hgeparticle.h"
-#include "Ship.h"
+#include "Player.h"
 
 
 // Pointer to the HGE interface.
@@ -28,27 +28,18 @@ HGE *hge=0;
 
 // Pointers to the HGE objects we will use
 hgeFont*			fnt;
-Ship*				ship1;
-Ship*				ship2;
+Player*				player1;
+Player*				player2;
 
 // Handles for HGE resourcces
 HTEXTURE			tex;
 HEFFECT				snd;
 
-
-
-// Play sound effect
-void boom() {
-	//int pan=int((x-400)/4);
-	//float pitch=(dx*dx+dy*dy)*0.0005f+0.2f;
-	//hge->Effect_PlayEx(snd,100,pan,pitch);
-}
-
 bool FrameFunc()
 {
 	if (hge->Input_GetKeyState(HGEK_ESCAPE)) return true;
-	ship1->Update(hge);
-	ship2->Update(hge);
+	player1->Update(hge);
+	player2->Update(hge);
 	return false;
 }
 
@@ -58,8 +49,8 @@ bool RenderFunc()
 	// Render graphics
 	hge->Gfx_BeginScene();
 	hge->Gfx_Clear(0);
-	ship1->Render();
-	ship2->Render();
+	player1->Render();
+	player2->Render();
 	hge->Gfx_EndScene();
 
 	return false;
@@ -94,9 +85,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			hge->Release();
 			return 0;
 		}
-		ship1=new Ship(new hgeSprite(tex, 96, 64, 32, 32),96,64,HGEK_Z,"Z");
-		ship2=new Ship(new hgeSprite(tex, 96, 64, 32, 32),300,300,HGEK_X,"X");
-		ship2->Rotate();
+		player1=new Player(new hgeSprite(tex, 96, 64, 32, 32),96,64,HGEK_Z,"Z");
+		player2=new Player(new hgeSprite(tex, 96, 64, 32, 32),300,300,HGEK_X,"X");
+		player2->Rotate();
 		// Load a font
 		fnt=new hgeFont("font1.fnt");
 
@@ -105,8 +96,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		// Delete created objects and free loaded resources
 		delete fnt;
-		delete ship1;
-		delete ship2;
+		delete player1;
+		delete player2;
 		hge->Texture_Free(tex);
 		hge->Effect_Free(snd);
 	}
