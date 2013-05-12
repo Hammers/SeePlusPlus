@@ -1,4 +1,3 @@
-#define _USE_MATH_DEFINES
 #include "Ship.h"
 
 Ship::Ship(hgeSprite* spr,float xIn, float yIn) : x(xIn), y(yIn), dx(0), dy(0), speed(90), friction(0.7f), rotation (0){
@@ -23,12 +22,8 @@ void Ship::Render(){
 void Ship::Update(HGE* hge){
 	float dt=hge->Timer_GetDelta();
 	
-	// Do some movement calculations and collision detection	
+	// Do some movement calculations	
 	dx*=friction; dy*=friction; x+=dx; y+=dy;
-	if(x>784) {x=784-(x-784);dx=-dx;}
-	if(x<16) {x=16+16-x;dx=-dx;}
-	if(y>584) {y=584-(y-584);dy=-dy;}
-	if(y<16) {y=16+16-y;dy=-dy;}
 
 	// Update particle system
 	particle->info.nEmission=(int)(dx*dx+dy*dy)*2;
@@ -37,6 +32,4 @@ void Ship::Update(HGE* hge){
 }
 
 Ship::~Ship(){
-	delete particleSprite;
-	delete particle;
 }

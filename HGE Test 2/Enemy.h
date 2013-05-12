@@ -2,43 +2,17 @@
 #define ENEMY_H
 #include "hge.h"
 #include "hgesprite.h"
-#include "hgeparticle.h"
-#include "hgefont.h"
+#include "Ship.h"
 
-class Enemy{
+class Enemy : public Ship{
 private:
-	hgeSprite* sprite;
-	hgeSprite* particleSprite;
-	hgeParticleSystem* particle;
-	hgeFont* fnt;
-	float x;
-	float y;
-	float dx;
-	float dy;
-	float speed;
-	float friction;
-	float rotation;
-	int key;
-	const char* keyChar;
+	bool onScreen;
 public:
 	Enemy(hgeSprite*,float,float);
-	~Enemy();
-	void setX(float inX) {x = inX;}
-	float getX() {return x;}
-	void setY(float inY) {y = inY;}
-	float getY() {return y;}
-	void setDx(float inDx) {dx = inDx;}
-	float getDx() {return dx;}
-	void setDy(float inDy) {dy = inDy;}
-	float getDy() {return dy;}
-	void setSpeed(float inSpeed) { speed = inSpeed;}
-	float getSpeed() {return speed;}
-	void setFriction(float inFriction) { friction = inFriction;}
-	float getFriction() {return friction;}
-	void setRotation(float inRotation) {rotation = inRotation;}
-	float getRotation() {return rotation;}
+	bool getOnScreen(){return onScreen;}
 	void Render();
 	void Update(HGE*);
+	hgeRect* getBoundingBox() {return Ship::getBoundingBox();}
 };
 
 #endif

@@ -13,13 +13,14 @@
 // executable file. Also copy hge.dll and bass.dll
 // to the same folder.
 
-
 #include "hge.h"
 #include "hgesprite.h"
 #include "hgefont.h"
 #include "hgeparticle.h"
+#include "hgerect.h"
 #include "Player.h"
-
+#include "Enemy.h"
+#include <vector>
 
 // Pointer to the HGE interface.
 // Helper classes require this to work.
@@ -27,19 +28,165 @@ HGE *hge=0;
 
 
 // Pointers to the HGE objects we will use
-hgeFont*			fnt;
-Player*				player1;
-Player*				player2;
+hgeFont*				fnt;
+hgeSprite*				playerSprite;
+hgeSprite*				enemySprite;
+
+//Other gameplay variables
+std::vector<Player*>	players;
+std::vector<Enemy*>		enemies;
+std::vector<int>		keys;
+float					addPlayerTimer;
+float					addEnemyTimer;
+float					newEnemyTime;
+int						score;
+bool					gameActive;
 
 // Handles for HGE resourcces
 HTEXTURE			tex;
 HEFFECT				snd;
 
+void GameInit(){
+	//Create Sprites
+	playerSprite = new hgeSprite(tex, 96, 64, 32, 32);
+	enemySprite = new hgeSprite(tex, 72, 104, 16, 16);
+	
+	//Create Initial Players
+	Player* player = new Player(playerSprite,400,300,HGEK_Z,"Z");
+	players.push_back(player);
+	
+	// Load a font
+	fnt=new hgeFont("font1.fnt");
+	
+	//Setup gameplay variables
+	gameActive = true;
+	addPlayerTimer = 20.0f;
+	addEnemyTimer = 5.0f;
+	newEnemyTime = 4.0f;
+	score = 0;
+	for (int i = HGEK_A; i<HGEK_Z; i++) keys.push_back(i);
+}
+
+void CheckEnemyHits(){
+	for(int i=0;i < enemies.size(); i++){
+		hgeRect* enemyBox;
+		Enemy* enemy = enemies.at(i);
+		enemyBox = enemy->getBoundingBox();
+		for(int j=0; j < players.size(); j++){
+			hgeRect* playerBox;
+			Player* player = players.at(j);
+				if (!player->getInvulnerable()) {
+				playerBox = player->getBoundingBox();
+				if (enemyBox->Intersect(playerBox)){
+					gameActive = false;
+				}
+			}
+		}
+	}
+}
+
+void CheckEnemyBounds(){
+	for(int i=0;i < enemies.size(); i++){
+		Enemy* enemy = enemies.at(i);
+		if (enemy->getOnScreen() && !(enemy->getX() >= 0 && enemy->getY()>=0 && enemy->getY()<=600 && enemy->getX()<=800)){
+			delete enemy;
+			enemies.erase(enemies.begin()+i);
+			score += 1;
+		}
+	}
+}
+
+const char * GetKeyChar(int keyCode){
+	switch(keyCode){
+		case HGEK_A : return "A";
+		case HGEK_B : return "B";
+		case HGEK_C : return "C";
+		case HGEK_D : return "D";
+		case HGEK_E : return "E";
+		case HGEK_F : return "F";
+		case HGEK_G : return "G";
+		case HGEK_H : return "H";
+		case HGEK_I : return "I";
+		case HGEK_J : return "J";
+		case HGEK_K : return "K";
+		case HGEK_L : return "L";
+		case HGEK_M : return "M";
+		case HGEK_N : return "N";
+		case HGEK_O : return "O";
+		case HGEK_P : return "P";
+		case HGEK_Q : return "Q";
+		case HGEK_R : return "R";
+		case HGEK_S : return "S";
+		case HGEK_T : return "T";
+		case HGEK_U : return "U";
+		case HGEK_V : return "V";
+		case HGEK_W : return "W";
+		case HGEK_X : return "X";
+		case HGEK_Y : return "Y";
+	}
+}
+
+void AddPlayer(){
+	int rnd = hge->Random_Int(0,keys.size()-1);
+	int keyCode = keys.at(rnd);
+	keys.erase(keys.begin()+rnd);
+	Player* player = new Player(playerSprite,400,300,keyCode,GetKeyChar(keyCode));
+	players.push_back(player);
+}
+
+void AddEnemy(){
+	int rnd = hge->Random_Int(0,3);
+	int x;
+	int y;
+	switch(rnd){
+	case 0 :
+		x = hge->Random_Int(0,800);
+		y = -40;
+		break;
+	case 1 :
+		x = -40;
+		y = hge->Random_Int(0,600);
+		break;
+	case 2 :
+		x = hge->Random_Int(0,800);
+		y = 640;
+		break;
+	case 3 :
+		x = 840;
+		y = hge->Random_Int(0,600);
+		break;
+	}
+	Enemy* enemy = new Enemy(enemySprite,x,y);
+	enemy->setRotation(M_PI_2 * rnd);
+	enemy->setSpeed(hge->Random_Int(40,50));
+	enemies.push_back(enemy);
+}
+
 bool FrameFunc()
 {
+	float dt = hge->Timer_GetDelta();
 	if (hge->Input_GetKeyState(HGEK_ESCAPE)) return true;
-	player1->Update(hge);
-	player2->Update(hge);
+	if (gameActive){
+		for(int i=0;i < players.size(); i++){
+			players.at(i)->Update(hge);
+		}
+		for(int i=0;i < enemies.size(); i++){
+			enemies.at(i)->Update(hge);
+		}
+		CheckEnemyHits();
+		CheckEnemyBounds();
+		addPlayerTimer -= dt;
+		if (addPlayerTimer < 0){
+			AddPlayer();
+			addPlayerTimer = 20;
+		}
+		addEnemyTimer -= dt;
+		if (addEnemyTimer < 0){
+			AddEnemy();
+			addEnemyTimer = newEnemyTime + hge->Random_Float(0.0f,1.0f);
+			if (newEnemyTime > 1.0f) newEnemyTime -= 0.1f;
+		}
+	}
 	return false;
 }
 
@@ -49,8 +196,20 @@ bool RenderFunc()
 	// Render graphics
 	hge->Gfx_BeginScene();
 	hge->Gfx_Clear(0);
-	player1->Render();
-	player2->Render();
+	
+	//Render Players
+	for(int i=0;i < players.size(); i++){
+		players.at(i)->Render();
+	}
+	
+	//Render Enemies
+	for(int i=0;i < enemies.size(); i++){
+		enemies.at(i)->Render();
+	}
+
+	//fnt->printf(5, 5, HGETEXT_LEFT, "PLAYER: %.2f",addPlayerTimer);
+	//fnt->printf(5, 25, HGETEXT_LEFT, "ENEMY: %.2f",addEnemyTimer);
+	fnt->printf(400, 5, HGETEXT_CENTER, "%d",score);
 	hge->Gfx_EndScene();
 
 	return false;
@@ -70,7 +229,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	hge->System_SetState(HGE_SCREENWIDTH, 800);
 	hge->System_SetState(HGE_SCREENHEIGHT, 600);
 	hge->System_SetState(HGE_SCREENBPP, 32);
-
+	
 	if(hge->System_Initiate()) {
 
 		// Load sound and texture
@@ -85,19 +244,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			hge->Release();
 			return 0;
 		}
-		player1=new Player(new hgeSprite(tex, 96, 64, 32, 32),96,64,HGEK_Z,"Z");
-		player2=new Player(new hgeSprite(tex, 96, 64, 32, 32),300,300,HGEK_X,"X");
-		player2->Rotate();
-		// Load a font
-		fnt=new hgeFont("font1.fnt");
-
+		
+		GameInit();
 		// Let's rock now!
 		hge->System_Start();
 
 		// Delete created objects and free loaded resources
 		delete fnt;
-		delete player1;
-		delete player2;
+		for(int i=0;i < players.size(); i++){
+			delete players.at(i);
+		}
+		for(int i=0;i < enemies.size(); i++){
+			delete enemies.at(i);
+		}
+		delete playerSprite;
+		delete enemySprite;
 		hge->Texture_Free(tex);
 		hge->Effect_Free(snd);
 	}
@@ -107,3 +268,4 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	hge->Release();
 	return 0;
 }
+

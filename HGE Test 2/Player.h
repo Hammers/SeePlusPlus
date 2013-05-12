@@ -6,18 +6,25 @@
 #include "hgeparticle.h"
 #include "hgefont.h"
 
-class Player : Ship{
+class Player : public Ship{
 private:
 	hgeFont* fnt;
+	bool invulnerable;
+	float invulnerableTimer;
 	int simpleRotation;
 	int key;
 	const char* keyChar;
+	bool displayShip;
+	float displayShipTimer;
 public:
 	Player(hgeSprite*,float,float,int,const char*);
+	~Player();
 	int getSimpleRotation() {return simpleRotation;}
+	bool getInvulnerable() {return invulnerableTimer > 0.0f;}
 	void Rotate();
 	void Render();
 	void Update(HGE*);
+	hgeRect* getBoundingBox() {return Ship::getBoundingBox();}
 };
 
 #endif
