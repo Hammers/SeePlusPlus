@@ -18,6 +18,8 @@
 #include "hgefont.h"
 #include "hgeparticle.h"
 #include "hgerect.h"
+#include "hgegui.h"
+#include "MenuItem.h"
 #include "Player.h"
 #include "Enemy.h"
 #include <vector>
@@ -31,7 +33,7 @@ HGE *hge=0;
 hgeFont*				fnt;
 hgeSprite*				playerSprite;
 hgeSprite*				enemySprite;
-
+hgeGUI*					gui;
 //Other gameplay variables
 std::vector<Player*>	players;
 std::vector<Enemy*>		enemies;
@@ -59,7 +61,7 @@ void GameInit(){
 	fnt=new hgeFont("font1.fnt");
 	
 	//Setup gameplay variables
-	gameActive = true;
+	gameActive = false;
 	addPlayerTimer = 20.0f;
 	addEnemyTimer = 5.0f;
 	newEnemyTime = 4.0f;
@@ -162,6 +164,33 @@ void AddEnemy(){
 	enemies.push_back(enemy);
 }
 
+void CleanUpGUI()
+{
+	delete gui;
+}
+
+bool UpdateGUI(float dt)
+{
+	int id;
+	static int lastid=0;
+
+	id=gui->Update(dt);
+	if(id == -1)
+	{
+		switch(lastid)
+		{
+		case 1:
+			gameActive = true;
+			gui->SetFocus(1);
+			gui->Enter();
+			break;
+		case 2: return true;
+		}
+	}
+	else if(id) { lastid=id; gui->Leave(); }
+	return false;
+}
+
 bool FrameFunc()
 {
 	float dt = hge->Timer_GetDelta();
@@ -187,34 +216,53 @@ bool FrameFunc()
 			if (newEnemyTime > 1.0f) newEnemyTime -= 0.1f;
 		}
 	}
+	else
+	{
+		if (UpdateGUI(dt)) return true;
+	}
 	return false;
 }
 
 
 bool RenderFunc()
 {
+	
+	
 	// Render graphics
 	hge->Gfx_BeginScene();
 	hge->Gfx_Clear(0);
+	if (gameActive){
+		//Render Players
+		for(int i=0;i < players.size(); i++){
+			players.at(i)->Render();
+		}
 	
-	//Render Players
-	for(int i=0;i < players.size(); i++){
-		players.at(i)->Render();
-	}
-	
-	//Render Enemies
-	for(int i=0;i < enemies.size(); i++){
-		enemies.at(i)->Render();
-	}
+		//Render Enemies
+		for(int i=0;i < enemies.size(); i++){
+			enemies.at(i)->Render();
+		}
 
-	//fnt->printf(5, 5, HGETEXT_LEFT, "PLAYER: %.2f",addPlayerTimer);
-	//fnt->printf(5, 25, HGETEXT_LEFT, "ENEMY: %.2f",addEnemyTimer);
-	fnt->printf(400, 5, HGETEXT_CENTER, "%d",score);
+		//fnt->printf(5, 5, HGETEXT_LEFT, "PLAYER: %.2f",addPlayerTimer);
+		//fnt->printf(5, 25, HGETEXT_LEFT, "ENEMY: %.2f",addEnemyTimer);
+		fnt->printf(400, 5, HGETEXT_CENTER, "%d",score);
+		
+	}
+	else {
+		gui->Render();
+	}
 	hge->Gfx_EndScene();
-
 	return false;
 }
 
+void AddGUI()
+{
+	gui=new hgeGUI();
+	gui->AddCtrl(new MenuItem(1,fnt,400,200,0.0f,"Play"));
+	gui->AddCtrl(new MenuItem(2,fnt,400,360,0.4f,"Exit"));
+	gui->SetNavMode(HGEGUI_UPDOWN | HGEGUI_CYCLED);
+	gui->SetFocus(1);
+	gui->Enter();
+}
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -244,13 +292,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			hge->Release();
 			return 0;
 		}
-		
 		GameInit();
+		AddGUI();
 		// Let's rock now!
 		hge->System_Start();
 
 		// Delete created objects and free loaded resources
 		delete fnt;
+		delete gui;
 		for(int i=0;i < players.size(); i++){
 			delete players.at(i);
 		}
